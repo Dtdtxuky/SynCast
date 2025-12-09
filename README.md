@@ -1,6 +1,6 @@
 # SynCast: Synergizing Contradictions in Precipitation Nowcasting via Diffusion Sequential Preference Optimization
 
-This repository contains the official PyTorch implementation for the paper "SynCast: Synergizing Contradictions in Precipitation Nowcasting via Diffusion Sequential Preference Optimization" (TCSVT-26462-2025).
+This repository contains the official PyTorch implementation for the paper "SynCast: Synergizing Contradictions in Precipitation Nowcasting via Diffusion Sequential Preference Optimization".
 
 ## Installation
 
@@ -11,22 +11,11 @@ This repository contains the official PyTorch implementation for the paper "SynC
     ```
 
 2.  **Create and Activate a Conda Environment:**
-    We recommend using Python 3.8 or higher.
+    We recommend using Python 3.10 or higher.
     ```bash
     conda create -n syncast python=3.8
     conda activate syncast
     ```
-
-3.  **Install Dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-## Dataset Preparation
-
-We are currently in the process of organizing the datasets. We will provide download links and detailed preparation instructions here shortly.
-
-Once available, please download the data and place it in the `./data` directory.
 
 ## Training Workflow
 
@@ -43,21 +32,6 @@ The primary training script is `train.py`. We have provided a convenience script
 
 To run a specific training stage, simply execute `train.sh` and pass the path to the corresponding configuration file as an argument.
 
-#### Stage 1: Base Model Pre-training```bash
-bash train.sh ./configs/stage1_base_model.yaml
-```
-
-#### Stage 2: DPO Fine-tuning for FAR
-*Note: This stage requires a pre-trained checkpoint from Stage 1. Ensure the checkpoint path is correctly specified in the config file.*
-```bash
-bash train.sh ./configs/stage2_dpo_far.yaml
-```
-
-#### Stage 3: SPO Fine-tuning for CSI
-*Note: This stage requires a fine-tuned checkpoint from Stage 2. Ensure the checkpoint path is correctly specified in the config file.*
-```bash
-bash train.sh ./configs/stage3_spo_csi.yaml
-```
 
 ## Citation
 
@@ -66,12 +40,9 @@ If you find our work useful in your research, we would appreciate a citation to 
 ```bibtex
 @article{xu2025syncast,
   title={SynCast: Synergizing Contradictions in Precipitation Nowcasting via Diffusion Sequential Preference Optimization},
-  author={Xu, Kaiyi and Gong, Junchao and Zhang, Wenlong and Fei, Ben and Bai, Lei and Ouyang, Wangli},
-  journal={IEEE Transactions on Circuits and Systems for Video Technology},
+  author={Xu, Kaiyi and Gong, Junchao and Zhang, Wenlong and Fei, Ben and Bai, Lei and Ouyang, Wanli},
+  journal={arXiv preprint arXiv:2510.21847},
   year={2025}
 }
 ```
 
-## Acknowledgements
-
-[Optional: Add any acknowledgements here, e.g., to other open-source projects you have used.]
