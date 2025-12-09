@@ -35,7 +35,7 @@ trainer:
   batch_size: 8 # to check
   valid_batch_size: 12
   max_epoch: &max_epoch 1
-  max_step: 100000
+  max_step: 500000
 
 model:
   type: ddpm_diffusion_model
