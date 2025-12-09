@@ -1,0 +1,178 @@
+sevir: &sevir
+  type: sevir_3h_ddpm_dpo_spo
+  input_length: &input_length 6 
+  pred_length: &pred_length 18
+  total_length: &total_length 24
+  base_freq: 5min
+  data_dir: radar:s3://weather_radar_datasets/sevir
+  height: 128
+  width: 128
+
+  partial_valid: 1.0
+
+
+dataset:
+  train:
+    <<: *sevir
+
+  test:
+    <<: *sevir
+
+  valid:
+    <<: *sevir
+
+sampler:
+  type: TrainingSampler
+
+dataloader:
+  kwargs:
+    num_workers: 8
+    pin_memory: False
+    prefetch_factor: 2
+    persistent_workers: True
+
+trainer:
+  batch_size: 8 # to check
+  valid_batch_size: 8
+  max_epoch: &max_epoch 1
+  max_step: 360
+
+model:
+  type: spo
+  params:
+    diffusion_kwargs:
+      noise_scheduler:
+        DDPMScheduler:
+          num_train_timesteps: &num_classes 1000
+          beta_start: &sigma_start 0.0001
+          beta_end: &sigma_end 0.02
+          beta_schedule: &sigma_dist linear
+          clip_sample_range: 13
+          prediction_type: epsilon
+      classifier_free_guidance:
+        p_uncond: 0.1
+        guidance_weight: 1 ## TODO
+
+    dpo:
+      beta_dpo: 3000
+      alpha: 0.5
+      guidance: 0.1
+
+    sub_model:
+       diffcast:
+        unet_kwargs:
+          dim: &dim 64
+          dim_mults: &dim_mults [1, 2, 4, 8]
+          T_in: *pred_length
+
+        ctxNet_kwargs:
+          dim: *dim
+          dim_mults: *dim_mults
+          channels: 1
+
+       diffcast_far:
+        unet_kwargs:
+          dim: *dim
+          dim_mults: *dim_mults
+          T_in: *pred_length
+
+        ctxNet_kwargs:
+          dim: *dim
+          dim_mults: *dim_mults
+          channels: 1
+          
+       diffcast_ref:
+        unet_kwargs:
+          dim: *dim
+          dim_mults: *dim_mults
+          T_in: *pred_length
+
+        ctxNet_kwargs:
+          dim: *dim
+          dim_mults: *dim_mults
+          channels: 1
+
+      
+    flow_kwargs:
+      path_type: Linear
+      prediction: velocity
+      # loss-weight:
+      # sample-eps:
+      # train-eps:
+
+
+    save_best: MSE
+    use_ceph: False
+    ceph_checkpoint_path: /mnt/petrelfs/xukaiyi/CodeSpace/rankcast/checkpoint
+    ref_dpo_path: 
+    far_dpo_path:
+    metrics_type: SEVIRSkillScore
+    seq_len: *pred_length
+    data_type: fp32
+
+    visualizer:
+      visualizer_type: sevir_visualizer
+      visualizer_step: 10000
+
+    optimizer:
+      diffcast:
+        type: AdamW
+        params:
+          lr: 0.000001
+          betas: [0.9, 0.95]
+
+      diffcast_far:
+        type: AdamW
+        params:
+          lr: 0.000001
+          betas: [0.9, 0.95]
+
+      diffcast_ref:
+        type: AdamW
+        params:
+          lr: 0.000001
+          betas: [0.9, 0.95]
+
+
+    lr_scheduler:
+      diffcast:
+        by_step: True
+        sched: cosine
+        epochs: *max_epoch
+        min_lr: 0.000001
+        warmup_lr: 0.000001
+        warmup_epochs: 0.1
+        lr_noise: 
+        cooldown_epochs: 0
+
+      diffcast_ref:
+        by_step: True
+        sched: cosine
+        epochs: *max_epoch
+        min_lr: 0.000001
+        warmup_lr: 0.000001
+        warmup_epochs: 0.1
+        lr_noise: 
+        cooldown_epochs: 0
+  
+      diffcast_far:
+        by_step: True
+        sched: cosine
+        epochs: *max_epoch
+        min_lr: 0.000001
+        warmup_lr: 0.000001
+        warmup_epochs: 0.1
+        lr_noise: 
+        cooldown_epochs: 0
+
+    extra_params:
+      loss_type: MSELoss
+      enabled_amp: False
+      log_step: 20
+      z_score_delta: False              
+      eval_steps: 10000
+      save_step: 20 #10000
+
+
+
+# ceph_checkpoint_path: "mpas:s3://gongjunchao/rankcast/checkpoint"
